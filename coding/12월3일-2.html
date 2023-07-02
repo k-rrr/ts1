@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>표만들기</title>
+</head>
+<body>
+    <fieldset>
+    <table>
+        <caption>과일</caption>
+    <tr>
+        <th>번호</th>
+        <th>상품영</th>
+        <th>수량</th>
+        <th>가격</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>콜라</td>
+        <td>1개</td>
+        <td>1500원</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>사이다</td>
+        <td>2개</td>
+        <td>1,000원</td>
+    </tr>
+</fieldset>
+
+<div id="map" style="width:750px;height:350px;"></div>
+
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=928855"></script>
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+        mapOption = {
+            center: new kakao.maps.LatLng(37.56682, 126.97865), // 지도의 중심좌표
+            level: 3, // 지도의 확대 레벨
+            mapTypeId : kakao.maps.MapTypeId.ROADMAP // 지도종류
+        }; 
+
+    // 지도를 생성한다 
+    var map = new kakao.maps.Map(mapContainer, mapOption); 
+
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>동물병원 검색</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 50%;
+            float: left;
+        }
+        
+        #list {
+            height: 400px;
+            width: 50%;
+            overflow-y: scroll;
+        }
+        
+        #search-form {
+            margin-bottom: 20px;
+        }
+        
+        .place-item {
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .place-item:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>동물병원 검색</h1>
+    
+    <div id="search-form">
+        <input type="text" id="keyword-input" placeholder="검색어를 입력하세요">
+        <button onclick="search()">검색</button>
+    </div>
+    
+    <div id="map"></div>
+    <div id="list"></div>
+    
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0abe8b87a0cfb2b20b1b55e88c710c57&libraries=services"></script>    <script>
+        var map;
+        var marker;
+        var infowindow;
+        
+        // 현재 위치 가져오기
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+        
+        function showPosition(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            
+            // Kakao Map 객체 생성
+            var mapContainer = document.getElementById("map");
+            var mapOptions = {
+                center: new kakao.maps.LatLng(latitude, longitude),
+                level: 4
+            };
+            map = new kakao.maps.Map(mapContainer, mapOptions);
+            
+            // 현재 위치 마커 추가
+            marker = new kakao.maps.Marker({
+                map: map,
+                position: mapOptions.center
+            });
+            
+            // 인포윈도우 생성
+            infowindow = new kakao.maps.InfoWindow({zIndex:1});
+        }
+        
+        function search() {
+            var keyword = document.getElementById("keyword-input").value;
+            
+            // 기존 마커 제거
+            if (marker) {
+                marker.setMap(null);
+            }
+            
+            // 검색 결과 표시할 마커 클러스터 객체 생성
+            var clusterer = new kakao.maps.MarkerClusterer({
+                map: map,
+                averageCenter: true,
+                minLevel: 6
+            });
+            
+            // 동물병원 검색
+            var places = new kakao.maps.services.Places();
+            places.keywordSearch(keyword, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    displayPlaces(result);
+                }
+            });
+        }
+        
+        function displayPlaces(places) {
+            var list = document.getElementById('list');
+            list.innerHTML = '';
+            
+            var bounds = new kakao.maps.LatLngBounds();
+            
+            for (var i = 0; i < places.length; i++) {
+                var place = places[i];
+                
+                // 결과 목록에 추가
+                var item = document.createElement('div');
+                item.className = 'place-item';
+                item.innerHTML = '<span class="place-name">' + place.place_name + '</span><br><span class="place-address">' + place.address_name + '</span>';
+                item.onclick = function() {
+                    displayInfowindow(place);
+                };
+                
+                list.appendChild(item);
+                
+                // 지도에 마커 표시
+                var marker = new kakao.maps.Marker({
+                    map: map,
+                    position: new kakao.maps.LatLng(place.y, place.x)
+                });
+                
+                bounds.extend(new kakao.maps.LatLng(place.y, place.x));
+                
+                kakao.maps.event.addListener(marker, 'click', (function(marker, place) {
+                    return function() {
+                        displayInfowindow(place);
+                    };
+                })(marker, place));
+            }
+            
+            map.setBounds(bounds);
+        }
+        
+        function displayInfowindow(place) {
+            var content = '<div style="padding:5px;z-index:1;">' + place.place_name + '</div>';
+            
+            infowindow.setContent(content);
+            infowindow.open(map, marker);
+        }
+    </script>
+</body>
+</html>
